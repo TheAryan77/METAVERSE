@@ -1,0 +1,36 @@
+{
+  "name": "@repo/db",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Shared Prisma client for the monorepo",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "./client": "./src/index.ts",
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "prisma"
+  ],
+  "scripts": {
+    "build": "tsc -b",
+    "generate": "prisma generate",
+    "migrate:dev": "prisma migrate dev",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^7.2.0",
+    "prisma": "^7.2.0"
+  },
+  "devDependencies": {
+    "dotenv": "^16.6.1",
+    "typescript": "^5.9.3"
+  }
+}
