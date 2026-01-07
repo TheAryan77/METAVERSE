@@ -1,12 +1,12 @@
 import {z} from "zod"
 export const SignupSchema = z.object({
-    username: z.string().email(),
+    username: z.string(),
     password: z.string().min(8),
-    type: z.enum(["admin", "user"])
+    role: z.enum(["Admin", "User"])
 })
 export const SigninSchema = z.object({
-    username: z.string().email(),
-    password: z.string().min(8),
+    username: z.string(),
+    password: z.string(),
 
 })
 export const updatemetadata = z.object({
@@ -23,7 +23,35 @@ export const addElement = z.object({
     x : z.number(),
     y : z.number()
 })
+export const CreateElement = z.object({
+    imageUrl : z.string(),
+    width : z.number(),
+    height : z.number(),
+    static : z.boolean()
+})
+export const UpdateElement = z.object({
+    imageUrl:z.string() 
+})
 export const CreateAvatar = z.object({
     imageUrl: z.string(),
     name : z.string()
 })
+export const CreateMapSchema = z.object({
+    thumbnail : z.string(),
+    dimensions : z.string().regex(/^[0-9]{1,4}x[0-9]{1,4}$/),
+    name : z.string(),
+    defaultElements: z.array(z.object({
+        elementId : z.string(),
+        x : z.number(),
+        y : z.number()
+    }))
+})
+
+declare global{
+    namespace Express{
+        interface Request{
+            role?:"Admin" | "User";
+            userId?:string;
+        }
+    }
+}
