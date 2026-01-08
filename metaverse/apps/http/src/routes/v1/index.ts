@@ -84,7 +84,7 @@ router.post("/signin",async (req,res)=>{
 
 
 router.get("/elements",(req,res)=>{
-    res.json({message:"elements"})
+    
 })
 
 router.get("/avatars",(req,res)=>{
