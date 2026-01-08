@@ -1,8 +1,8 @@
-import {Router} from "express";
+import e, {Router} from "express";
 export const router = Router()
 import {userMiddleware} from "../../middlewares/user.js"
 import {prisma} from "@repo/db"
-import { CreateSpaceschema ,addElement} from "../../types";
+import { CreateSpaceschema ,DeleteElement,addElement} from "../../types";
 import { parse } from "zod";
 
 router.post("/",userMiddleware, async (req,res)=>{
@@ -129,8 +129,48 @@ router.get("/all",userMiddleware, async (req,res)=>{
 
 })
 
-router.get("/:spaceId",(req,res)=>{
-    
+router.get("/:spaceId",userMiddleware,async (req,res)=>{
+    const spaceId = req.params.spaceId;
+    if(!spaceId){
+        return res.json({message:"SpaceId not found"})
+    }
+    const space = await prisma.space.findUnique({
+        where:{
+            id:spaceId
+        },
+        include:{
+            elements:{
+                include:{
+                    element:true
+                }
+            }
+        }
+    })  
+
+    if(!space){
+        res.status(400).json({message:"Space not found"})
+        return
+    }
+
+    return res.json({
+        "dimensions":`${space.width}x${space.height}`,
+        elements:space.elements.map((e)=>{
+            return {
+                id:e.id,
+                element:{
+                    id:e.element.id,
+                    name:e.element.imageUrl,
+                    width:e.element.width,
+                    height:e.element.height,
+                    static:e.element.static
+
+                },
+                x:e.x,
+                y:e.y
+            }
+        })
+    })
+
 })
 
 
@@ -163,10 +203,31 @@ router.post("/element",userMiddleware,async(req,res)=>{
         }
     })
     res.json({message:"Element added successfully"})
-
 })
 
 
-router.delete("/element",(req,res)=>{
-    
+router.delete("/element",userMiddleware,async (req,res)=>{
+    const parsedData = DeleteElement.safeParse(req.body);
+    if(!parsedData.data){
+        return res.status(400).json({message:"Invalid inputs"});
+    }
+    const spaceElement = await prisma.spaceElements.findFirst({
+        where:{
+            id:parsedData.data.id
+        },
+        include:{
+            space:true
+        }
+    })
+    if(spaceElement?.space.creatorId != req.userId){
+        return res.status(400).json({message:"You're not the creator of this space"})
+    }
+    await prisma.spaceElements.delete({
+        where:{
+            id:parsedData.data.id
+        }
+    })
+
+
+    res.json({message:"Element deleted successfully"})
 })

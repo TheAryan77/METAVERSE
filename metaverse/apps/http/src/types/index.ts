@@ -47,6 +47,11 @@ export const CreateMapSchema = z.object({
     }))
 })
 
+export const DeleteElement = z.object({
+    id:z.string()
+})
+
+
 declare global{
     namespace Express{
         interface Request{
