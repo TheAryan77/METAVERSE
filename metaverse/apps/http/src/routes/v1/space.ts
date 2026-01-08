@@ -2,7 +2,7 @@ import {Router} from "express";
 export const router = Router()
 import {userMiddleware} from "../../middlewares/user.js"
 import {prisma} from "@repo/db"
-import { CreateSpaceschema } from "../../types";
+import { CreateSpaceschema ,addElement} from "../../types";
 import { parse } from "zod";
 
 router.post("/",userMiddleware, async (req,res)=>{
@@ -110,19 +110,62 @@ router.delete("/:spaceId",userMiddleware, async (req,res)=>{
     res.status(200).json({message:"Space deleted successfully"})
 })
 
-router.get("/all",userMiddleware,(req,res)=>{
-    const spaces = prisma.space.findMany({
-        select:{
-            id:true,
-            name:true
+router.get("/all",userMiddleware, async (req,res)=>{
+    const sp = await prisma.space.findMany({
+        where:{
+            creatorId:req.userId!
         }
     })
-    return res.json(spaces)
+    res.json({
+        spaces:sp.map((space)=>{
+            return {
+                id:space.id,
+                name:space.name,
+                thumbnail:space.thumbnail,
+                dimensions:`${space.width}x${space.height}`
+            }
+        })
+    })
+
 })
 
-router.post("/element",(req,res)=>{
+router.get("/:spaceId",(req,res)=>{
+    
+})
+
+
+router.post("/element",userMiddleware,async(req,res)=>{
+    const parsedData = addElement.safeParse(req.body);  
+    if(!parsedData.data){
+        return res.status(400).json({message:"Invalid inputs"});
+    }   
+
+    const space = await prisma.space.findUnique({
+        where:{
+            id:req.body.spaceId,
+            creatorId:req.userId!
+        },
+        select:{
+            width:true,
+            height:true
+        }
+    })
+    if(!space){
+        return res.json({message:"Space not found"})
+    }
+
+    await prisma.spaceElements.create({
+        data:{
+            elementId:parsedData.data.elementId,
+            spaceId:parsedData.data.spaceId,
+            x:parsedData.data.x,
+            y:parsedData.data.y
+        }
+    })
+    res.json({message:"Element added successfully"})
 
 })
+
 
 router.delete("/element",(req,res)=>{
     
