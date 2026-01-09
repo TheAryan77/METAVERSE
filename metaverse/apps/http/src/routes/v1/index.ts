@@ -91,10 +91,12 @@ router.get("/elements",async (req,res)=>{
             imageUrl:e.imageUrl,
             width:e.width,
             height:e.height,
-            static:e.static
+            static:e.static 
         }))
     })
 })
+
+//checkcomment
 
 router.get("/avatars",async (req,res)=>{
     const avatars = await prisma.avatar.findMany();
