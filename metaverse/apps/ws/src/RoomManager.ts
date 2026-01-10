@@ -22,6 +22,7 @@ export class RoomManager {
         }
         this.rooms.set(spaceId, (this.rooms.get(spaceId)?.filter((u) => u.id !== user.id) ?? []));
     }
+    //daycount
 
     public addUser(spaceId: string, user: User) {
         if (!this.rooms.has(spaceId)) {
